@@ -1,4 +1,4 @@
-# librooz# 📚 Librooz - Il tuo scaffale digitale
+#📚 Librooz - Il tuo scaffale digitale
 
 **Librooz** nasce dalla voglia di creare un e-commerce di libri che non sia il solito "negozio freddo", ma un ambiente che ricordi il calore di una libreria fisica in chiave moderna. Sviluppato interamente in PHP.
 
