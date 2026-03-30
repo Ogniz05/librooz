@@ -52,7 +52,7 @@ public function authenticate(): void
         ]);
     }
 
-    \Auth::login($utente, $this->boolean('remember'));
+    \Auth::guard('web')->login($utente, $this->boolean('remember'));
 
     RateLimiter::clear($this->throttleKey());
 }

@@ -21,9 +21,19 @@ class Utente extends Authenticatable
         return 'id_utente';
     }
 
+    public function getAuthIdentifier()
+    {
+        return $this->id_utente;
+    }
+
     public function getAuthPassword()
     {
         return $this->password;
+    }
+
+    public function isAdmin(): bool
+    {
+        return \App\Models\Admin::where('email', $this->email)->exists();
     }
 
     public function ordini() { return $this->hasMany(Ordine::class, 'id_utente'); }
