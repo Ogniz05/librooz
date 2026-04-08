@@ -6,11 +6,10 @@
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;600;700&display=swap');
 
-    /* ===== HERO ===== */
     .hero {
         background: linear-gradient(135deg, var(--ebano) 60%, var(--tabacco));
         color: var(--carta);
-        padding: 5rem 2rem;
+        padding: 6rem 2rem;
         text-align: center;
         position: relative;
         overflow: hidden;
@@ -71,6 +70,7 @@
         letter-spacing: 2px;
         text-transform: uppercase;
         transition: background 0.3s, transform 0.2s;
+        display: inline-block;
     }
 
     .btn-primary:hover { background: var(--tabacco); color: var(--carta); transform: translateY(-2px); }
@@ -86,11 +86,11 @@
         letter-spacing: 2px;
         text-transform: uppercase;
         transition: border-color 0.3s, color 0.3s;
+        display: inline-block;
     }
 
     .btn-secondary:hover { border-color: var(--bronzo); color: var(--bronzo); }
 
-    /* ===== SEZIONI ===== */
     .section { padding: 3rem 2rem; max-width: 1400px; margin: 0 auto; }
 
     .section-header {
@@ -121,7 +121,6 @@
 
     .section-link:hover { color: var(--tabacco); }
 
-    /* ===== CAROSELLO ===== */
     .carousel-wrapper { position: relative; }
 
     .carousel {
@@ -159,7 +158,6 @@
     .carousel-btn.prev { left: -20px; }
     .carousel-btn.next { right: -20px; }
 
-    /* ===== CARD LIBRO ===== */
     .card-libro {
         min-width: 160px;
         max-width: 160px;
@@ -179,15 +177,12 @@
     .card-cover {
         width: 100%;
         height: 200px;
-        object-fit: cover;
         background: linear-gradient(135deg, var(--tabacco), var(--ebano));
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 3rem;
     }
-
-    .card-cover img { width: 100%; height: 100%; object-fit: cover; }
 
     .card-body { padding: 10px 12px 14px; }
 
@@ -238,7 +233,6 @@
 
     .card-btn:hover { background: var(--tabacco); }
 
-    /* ===== EMPTY STATE ===== */
     .empty-state {
         text-align: center;
         padding: 3rem;
@@ -247,7 +241,6 @@
         font-size: 0.9rem;
     }
 
-    /* ===== BANNER ===== */
     .banner {
         background: linear-gradient(135deg, var(--tabacco), var(--ebano));
         margin: 1rem 2rem;
@@ -279,23 +272,43 @@
     }
 
     .banner-emoji { font-size: 5rem; }
+
+    .hero-loggato {
+        background: linear-gradient(135deg, var(--ebano) 60%, var(--tabacco));
+        color: var(--carta);
+        padding: 3rem 2rem;
+        text-align: center;
+    }
+
+    .hero-loggato h1 {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        letter-spacing: 3px;
+        margin-bottom: 0.3rem;
+    }
+
+    .hero-loggato h1 span { color: var(--bronzo); }
+
+    .hero-loggato p {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+        color: var(--cemento);
+    }
 </style>
 @endpush
 
 @section('content')
 
-    {{-- HERO --}}
-    <section class="hero">
-        <p class="hero-tag">The Online Bookspace</p>
-        <h1>Il tuo prossimo <span>libro</span><br>ti sta aspettando</h1>
-        <p>Scopri migliaia di titoli, dai classici ai nuovi arrivi. Ordina comodamente da casa.</p>
-        <div class="hero-buttons">
-            <a href="{{ route('catalogo') }}" class="btn-primary">Esplora il catalogo</a>
-            <a href="{{ route('register') }}" class="btn-secondary">Registrati gratis</a>
-        </div>
-    </section>
+@auth
+    {{-- ===== HOME UTENTE LOGGATO ===== --}}
 
-    {{-- LIBRI IN EVIDENZA --}}
+    {{-- Benvenuto --}}
+    <div class="hero-loggato">
+        <h1>Bentornato, <span>{{ Auth::user()->nome }}</span>!</h1>
+        <p>Scopri le novità e i libri più amati del momento.</p>
+    </div>
+
+    {{-- Libri in Evidenza --}}
     <div class="section">
         <div class="section-header">
             <h2 class="section-title">📚 Libri in Evidenza</h2>
@@ -315,23 +328,41 @@
                         </div>
                     </a>
                 @empty
-                    <div class="empty-state">Nessun libro disponibile al momento.</div>
+                    <div class="empty-state">Nessun libro disponibile.</div>
                 @endforelse
             </div>
             <button class="carousel-btn next" onclick="scrollCarousel('evidenza', 1)">›</button>
         </div>
     </div>
 
-    {{-- BANNER PROMOZIONALE --}}
-    <div class="banner">
-        <div class="banner-left">
-            <h2>Spedizione <span>gratuita</span><br>sopra i 25€</h2>
-            <p>Ordina adesso e ricevi i tuoi libri direttamente a casa tua in pochi giorni.</p>
+    {{-- Più Venduti --}}
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">⭐ Più Venduti</h2>
+            <a href="{{ route('catalogo') }}" class="section-link">Vedi tutti →</a>
         </div>
-        <div class="banner-emoji">🚚</div>
+        <div class="carousel-wrapper">
+            <button class="carousel-btn prev" onclick="scrollCarousel('venduti', -1)">‹</button>
+            <div class="carousel" id="venduti">
+                @forelse($piuVenduti as $libro)
+                    <a href="#" class="card-libro">
+                        <div class="card-cover">⭐</div>
+                        <div class="card-body">
+                            <p class="card-titolo">{{ $libro->titolo }}</p>
+                            <p class="card-autore">{{ $libro->autore->nome ?? '' }} {{ $libro->autore->cognome ?? '' }}</p>
+                            <p class="card-prezzo">€ {{ number_format($libro->prezzo, 2, ',', '.') }}</p>
+                            <button class="card-btn">+ Carrello</button>
+                        </div>
+                    </a>
+                @empty
+                    <div class="empty-state">Nessun libro disponibile.</div>
+                @endforelse
+            </div>
+            <button class="carousel-btn next" onclick="scrollCarousel('venduti', 1)">›</button>
+        </div>
     </div>
 
-    {{-- ULTIMI ARRIVI --}}
+    {{-- Ultimi Arrivi --}}
     <div class="section">
         <div class="section-header">
             <h2 class="section-title">🆕 Ultimi Arrivi</h2>
@@ -351,12 +382,46 @@
                         </div>
                     </a>
                 @empty
-                    <div class="empty-state">Nessun libro disponibile al momento.</div>
+                    <div class="empty-state">Nessun libro disponibile.</div>
                 @endforelse
             </div>
             <button class="carousel-btn next" onclick="scrollCarousel('arrivi', 1)">›</button>
         </div>
     </div>
+
+    {{-- Banner spedizione (per tutti) --}}
+    <div class="banner">
+        <div class="banner-left">
+            <h2>Spedizione <span>gratuita</span><br>sopra i 25€</h2>
+            <p>Ordina adesso e ricevi i tuoi libri direttamente a casa tua in pochi giorni.</p>
+        </div>
+        <div class="banner-emoji">🚚</div>
+    </div>
+
+@else
+    {{-- ===== HOME UTENTE NON LOGGATO ===== --}}
+
+    {{-- Hero --}}
+    <section class="hero">
+        <p class="hero-tag">The Online Bookspace</p>
+        <h1>Il tuo prossimo <span>libro</span><br>ti sta aspettando</h1>
+        <p>Scopri migliaia di titoli, dai classici ai nuovi arrivi. Ordina comodamente da casa.</p>
+        <div class="hero-buttons">
+            <a href="{{ route('register') }}" class="btn-primary">Registrati gratis</a>
+            <a href="{{ route('login') }}" class="btn-secondary">Accedi</a>
+        </div>
+    </section>
+
+    {{-- Banner spedizione (per tutti) --}}
+    <div class="banner">
+        <div class="banner-left">
+            <h2>Spedizione <span>gratuita</span><br>sopra i 25€</h2>
+            <p>Ordina adesso e ricevi i tuoi libri direttamente a casa tua in pochi giorni.</p>
+        </div>
+        <div class="banner-emoji">🚚</div>
+    </div>
+
+@endauth
 
 @endsection
 

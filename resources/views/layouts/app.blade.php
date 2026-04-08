@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Librooz — @yield('title', 'Il tuo negozio di libri')</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     @stack('styles')
 </head>
 
@@ -79,7 +80,71 @@
 
     {{-- FOOTER --}}
     <footer>
-        <p>© {{ date('Y') }} <span>Librooz</span> — Tutti i diritti riservati</p>
+        <div class="footer-top">
+
+            {{-- Brand --}}
+            <div class="footer-brand">
+                <a href="{{ route('home') }}" class="brand-logo">📚 Librooz</a>
+                <p>Il tuo spazio online dedicato ai libri. Scopri migliaia di titoli, dai classici ai nuovi arrivi, e ordinali comodamente da casa.</p>
+                <div class="footer-social">
+                    <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" title="TikTok"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+
+            {{-- Account --}}
+            <div class="footer-col">
+                <h4>Account</h4>
+                <ul>
+                    @auth
+                        <li><a href="{{ route('orders.index') }}">→ I miei ordini</a></li>
+                        <li><a href="{{ route('profile.index') }}">→ Il mio profilo</a></li>
+                    @else
+                        <li><a href="{{ route('login') }}">→ Accedi</a></li>
+                        <li><a href="{{ route('register') }}">→ Registrati</a></li>
+                    @endauth
+                </ul>
+            </div>
+
+            {{-- Informazioni --}}
+            <div class="footer-col">
+                <h4>Informazioni</h4>
+                <ul>
+                    <li><a href="#">→ Chi siamo</a></li>
+                    <li><a href="#">→ Come funziona</a></li>
+                    <li><a href="#">→ Spedizioni</a></li>
+                    <li><a href="#">→ Resi e rimborsi</a></li>
+                    <li><a href="#">→ FAQ</a></li>
+                </ul>
+            </div>
+
+            {{-- Newsletter --}}
+            <div class="footer-col">
+                <h4>Newsletter</h4>
+                <div class="footer-newsletter">
+                    <p>Iscriviti e ricevi ogni settimana le novità, le offerte esclusive e i consigli di lettura.</p>
+                    <div class="newsletter-form">
+                        <input type="email" placeholder="La tua email">
+                        <button type="button">→</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <hr class="footer-divider">
+
+        <div class="footer-bottom">
+            <div class="footer-bottom-left">
+                © {{ date('Y') }} <span>Librooz</span> — Tutti i diritti riservati
+            </div>
+            <div class="footer-bottom-right">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Termini di servizio</a>
+                <a href="#">Cookie</a>
+            </div>
+        </div>
     </footer>
 
     {{-- SCRIPTS --}}
