@@ -112,7 +112,6 @@
                 <h4>Informazioni</h4>
                 <ul>
                     <li><a href="#">→ Chi siamo</a></li>
-                    <li><a href="#">→ Come funziona</a></li>
                     <li><a href="#">→ Spedizioni</a></li>
                     <li><a href="#">→ Resi e rimborsi</a></li>
                     <li><a href="#">→ FAQ</a></li>

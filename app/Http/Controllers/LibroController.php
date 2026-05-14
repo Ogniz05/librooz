@@ -1,21 +1,26 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\Libro;
-use Illuminate\Support\Facades\Auth;
 
 class LibroController extends Controller
 {
     public function index()
     {
-        if (!Auth::check()) {
-            return view('home');
-        }
+        // Usiamo l'ID per l'ordine visto che non hai created_at
+        $inEvidenza = Libro::with('autore')->orderBy('id_libro', 'desc')->take(4)->get();
+        $nuoviArrivi = Libro::with('autore')->take(4)->get();
 
-        $inEvidenza = Libro::with('autore')->take(10)->get();
-        $ultimiArrivi = Libro::with('autore')->latest('anno_pubblicazione')->take(10)->get();
-        $piuVenduti = Libro::with('autore')->inRandomOrder()->take(10)->get();
+        return view('home', compact('inEvidenza', 'nuoviArrivi'));
+    }
 
-        return view('home', compact('inEvidenza', 'ultimiArrivi', 'piuVenduti'));
+    public function catalogo()
+    {
+        // Recuperiamo tutti i libri per la pagina catalogo
+        $libri = Libro::with('autore')->paginate(12);
+        
+        return view('catalogo', compact('libri'));
     }
 }
