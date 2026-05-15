@@ -167,8 +167,6 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         transition: transform 0.3s, box-shadow 0.3s;
         cursor: pointer;
-        text-decoration: none;
-        color: inherit;
         display: block;
     }
 
@@ -183,6 +181,8 @@
         justify-content: center;
         font-size: 3rem;
     }
+
+    .card-cover img { width: 100%; height: 100%; object-fit: cover; }
 
     .card-body { padding: 10px 12px 14px; }
 
@@ -301,8 +301,6 @@
 
 @auth
     {{-- ===== HOME UTENTE LOGGATO ===== --}}
-
-    {{-- Benvenuto --}}
     <div class="hero-loggato">
         <h1>Bentornato, <span>{{ Auth::user()->nome }}</span>!</h1>
         <p>Scopri le novità e i libri più amati del momento.</p>
@@ -318,15 +316,30 @@
             <button class="carousel-btn prev" onclick="scrollCarousel('evidenza', -1)">‹</button>
             <div class="carousel" id="evidenza">
                 @forelse($inEvidenza as $libro)
-                    <a href="#" class="card-libro">
-                        <div class="card-cover">📖</div>
+                    <div class="card-libro">
+                        <a href="{{ route('libri.show', $libro->id_libro) }}" style="text-decoration: none; color: inherit;">
+                            <div class="card-cover">
+                                @if($libro->copertina)
+                                    <img src="{{ asset('storage/' . $libro->copertina) }}" alt="{{ $libro->titolo }}">
+                                @else
+                                    📖
+                                @endif
+                            </div>
+                        </a>
+                        
                         <div class="card-body">
-                            <p class="card-titolo">{{ $libro->titolo }}</p>
-                            <p class="card-autore">{{ $libro->autore->nome ?? '' }} {{ $libro->autore->cognome ?? '' }}</p>
-                            <p class="card-prezzo">€ {{ number_format($libro->prezzo, 2, ',', '.') }}</p>
-                            <button class="card-btn">+ Carrello</button>
+                            <a href="{{ route('libri.show', $libro->id_libro) }}" style="text-decoration: none; color: inherit;">
+                                <p class="card-titolo">{{ $libro->titolo }}</p>
+                                <p class="card-autore">{{ $libro->autore->nome ?? '' }} {{ $libro->autore->cognome ?? '' }}</p>
+                                <p class="card-prezzo">€ {{ number_format($libro->prezzo, 2, ',', '.') }}</p>
+                            </a>
+                            
+                            <form action="{{ route('carrello.add', $libro->id_libro) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="card-btn">+ Carrello</button>
+                            </form>
                         </div>
-                    </a>
+                    </div>
                 @empty
                     <div class="empty-state">Nessun libro disponibile.</div>
                 @endforelse
@@ -345,15 +358,30 @@
             <button class="carousel-btn prev" onclick="scrollCarousel('venduti', -1)">‹</button>
             <div class="carousel" id="venduti">
                 @forelse($piuVenduti as $libro)
-                    <a href="#" class="card-libro">
-                        <div class="card-cover">⭐</div>
+                    <div class="card-libro">
+                        <a href="{{ route('libri.show', $libro->id_libro) }}" style="text-decoration: none; color: inherit;">
+                            <div class="card-cover">
+                                @if($libro->copertina)
+                                    <img src="{{ asset('storage/' . $libro->copertina) }}" alt="{{ $libro->titolo }}">
+                                @else
+                                    ⭐
+                                @endif
+                            </div>
+                        </a>
+                        
                         <div class="card-body">
-                            <p class="card-titolo">{{ $libro->titolo }}</p>
-                            <p class="card-autore">{{ $libro->autore->nome ?? '' }} {{ $libro->autore->cognome ?? '' }}</p>
-                            <p class="card-prezzo">€ {{ number_format($libro->prezzo, 2, ',', '.') }}</p>
-                            <button class="card-btn">+ Carrello</button>
+                            <a href="{{ route('libri.show', $libro->id_libro) }}" style="text-decoration: none; color: inherit;">
+                                <p class="card-titolo">{{ $libro->titolo }}</p>
+                                <p class="card-autore">{{ $libro->autore->nome ?? '' }} {{ $libro->autore->cognome ?? '' }}</p>
+                                <p class="card-prezzo">€ {{ number_format($libro->prezzo, 2, ',', '.') }}</p>
+                            </a>
+                            
+                            <form action="{{ route('carrello.add', $libro->id_libro) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="card-btn">+ Carrello</button>
+                            </form>
                         </div>
-                    </a>
+                    </div>
                 @empty
                     <div class="empty-state">Nessun libro disponibile.</div>
                 @endforelse
@@ -372,15 +400,30 @@
             <button class="carousel-btn prev" onclick="scrollCarousel('arrivi', -1)">‹</button>
             <div class="carousel" id="arrivi">
                 @forelse($ultimiArrivi as $libro)
-                    <a href="#" class="card-libro">
-                        <div class="card-cover">📗</div>
+                    <div class="card-libro">
+                        <a href="{{ route('libri.show', $libro->id_libro) }}" style="text-decoration: none; color: inherit;">
+                            <div class="card-cover">
+                                @if($libro->copertina)
+                                    <img src="{{ asset('storage/' . $libro->copertina) }}" alt="{{ $libro->titolo }}">
+                                @else
+                                    📗
+                                @endif
+                            </div>
+                        </a>
+                        
                         <div class="card-body">
-                            <p class="card-titolo">{{ $libro->titolo }}</p>
-                            <p class="card-autore">{{ $libro->autore->nome ?? '' }} {{ $libro->autore->cognome ?? '' }}</p>
-                            <p class="card-prezzo">€ {{ number_format($libro->prezzo, 2, ',', '.') }}</p>
-                            <button class="card-btn">+ Carrello</button>
+                            <a href="{{ route('libri.show', $libro->id_libro) }}" style="text-decoration: none; color: inherit;">
+                                <p class="card-titolo">{{ $libro->titolo }}</p>
+                                <p class="card-autore">{{ $libro->autore->nome ?? '' }} {{ $libro->autore->cognome ?? '' }}</p>
+                                <p class="card-prezzo">€ {{ number_format($libro->prezzo, 2, ',', '.') }}</p>
+                            </a>
+                            
+                            <form action="{{ route('carrello.add', $libro->id_libro) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="card-btn">+ Carrello</button>
+                            </form>
                         </div>
-                    </a>
+                    </div>
                 @empty
                     <div class="empty-state">Nessun libro disponibile.</div>
                 @endforelse
@@ -389,19 +432,8 @@
         </div>
     </div>
 
-    {{-- Banner spedizione (per tutti) --}}
-    <div class="banner">
-        <div class="banner-left">
-            <h2>Spedizione <span>gratuita</span><br>sopra i 25€</h2>
-            <p>Ordina adesso e ricevi i tuoi libri direttamente a casa tua in pochi giorni.</p>
-        </div>
-        <div class="banner-emoji">🚚</div>
-    </div>
-
 @else
     {{-- ===== HOME UTENTE NON LOGGATO ===== --}}
-
-    {{-- Hero --}}
     <section class="hero">
         <p class="hero-tag">The Online Bookspace</p>
         <h1>Il tuo prossimo <span>libro</span><br>ti sta aspettando</h1>
@@ -412,7 +444,6 @@
         </div>
     </section>
 
-    {{-- Banner spedizione (per tutti) --}}
     <div class="banner">
         <div class="banner-left">
             <h2>Spedizione <span>gratuita</span><br>sopra i 25€</h2>
@@ -420,7 +451,6 @@
         </div>
         <div class="banner-emoji">🚚</div>
     </div>
-
 @endauth
 
 @endsection

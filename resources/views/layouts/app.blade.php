@@ -6,6 +6,7 @@
     <title>Librooz — @yield('title', 'Il tuo negozio di libri')</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     @stack('styles')
 </head>
 
@@ -40,7 +41,16 @@
         </ul>
 
         {{-- Destra --}}
-        <div class="navbar-right">
+        <div class="navbar-right" style="display: flex; align-items: center; gap: 15px;">
+            
+            {{-- Pulsante Wishlist (Aperto a tutti) --}}
+            <a href="{{ route('wishlist.index') }}" class="btn-wishlist" style="text-decoration: none; font-size: 1.2rem; position: relative;" title="La mia Wishlist">
+                ❤️
+                <span class="badge-wishlist" style="position: absolute; top: -8px; right: -8px; background: #e74c3c; color: white; border-radius: 10px; padding: 1px 6px; font-size: 0.75rem; font-family: sans-serif; font-weight: bold;">
+                    {{ count(session()->get('wishlist', [])) }}
+                </span>
+            </a>
+
             @auth
                 <div class="user-menu">
                     <button class="user-btn" onclick="toggleUserMenu()">
@@ -63,10 +73,19 @@
                 <a href="{{ route('register') }}" class="btn-registrati">Registrati</a>
             @endauth
 
-            <a href="{{ route('carrello.index') }}" class="btn-carrello">
+            {{-- Pulsante Carrello Dinamico (DB per loggati, Sessione per ospiti) --}}
+            <a href="{{ route('carrello.index') }}" class="btn-carrello" style="position: relative; text-decoration: none;">
                 🛒
-                @if(session('cart') && count(session('cart')) > 0)
-                    <span class="badge-carrello">{{ count(session('cart')) }}</span>
+                @php
+                    $conteggioCarrello = Auth::check() 
+                        ? \App\Models\Carrello::where('id_utente', Auth::id())->sum('quantita') 
+                        : collect(session()->get('carrello', []))->sum('quantita');
+                @endphp
+                
+                @if($conteggioCarrello > 0)
+                    <span class="badge-carrello" style="position: absolute; top: -8px; right: -8px; background: #27ae60; color: white; border-radius: 10px; padding: 1px 6px; font-size: 0.75rem; font-family: sans-serif; font-weight: bold;">
+                        {{ $conteggioCarrello }}
+                    </span>
                 @endif
             </a>
         </div>
@@ -81,7 +100,6 @@
     {{-- FOOTER --}}
     <footer>
         <div class="footer-top">
-
             {{-- Brand --}}
             <div class="footer-brand">
                 <a href="{{ route('home') }}" class="brand-logo">📚 Librooz</a>
@@ -129,7 +147,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <hr class="footer-divider">
@@ -190,6 +207,8 @@
         <a href="{{ route('login') }}" class="btn-primary" style="display:block;text-align:center;margin-bottom:10px;">Accedi</a>
         <a href="{{ route('register') }}" class="btn-secondary" style="display:block;text-align:center;">Registrati gratis</a>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

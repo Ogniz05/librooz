@@ -1,50 +1,87 @@
 @extends('layouts.app')
 
-@section('title', 'Catalogo Libri')
-
 @section('content')
-<div class="container my-5" style="max-width: 1200px; margin: auto; padding: 20px;">
-    <h1 style="text-align: center; margin-bottom: 40px; color: #2c3e50;">📚 Tutti i nostri Libri</h1>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px;">
-        @foreach($libri as $libro)
-            <div style="background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column;">
+<style>
+    body { background: #0a0a0a !important; color: #e0e0e0; font-family: 'Poppins', sans-serif; }
+    .catalogo-titolo { font-family: 'Playfair Display'; color: #c5a059; margin-bottom: 1rem; text-align: center; }
+    
+    /* Barra di Filtro */
+    .filter-bar { background: #141414; border: 1px solid #222; border-radius: 12px; padding: 1rem; margin-bottom: 3rem; }
+    .form-select-custom { background: #000 !important; border: 1px solid #333 !important; color: #fff !important; color-scheme: dark; }
+    .btn-filter { background: #c5a059; color: #000; font-weight: 600; border: none; }
+
+    /* Griglia Libri */
+    .libro-card { 
+        background: #141414; border: 1px solid #222; border-radius: 15px; 
+        overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; height: 100%; display: flex; flex-column: column;
+    }
+    .libro-card:hover { 
+        transform: translateY(-5px); box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2); border-color: #c5a059;
+    }
+    
+    .copertina-wrap { height: 320px; background: #0f0f0f; overflow: hidden; position: relative; }
+    .copertina-img { width: 100%; height: 100%; object-fit: cover; }
+    .placeholder-img { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #333; }
+
+    .libro-corpo { padding: 1.2rem; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; }
+    .libro-prezzo { color: #c5a059; font-weight: 600; font-size: 1.15rem; }
+</style>
+
+<div class="container py-5">
+    <h1 class="catalogo-titolo">La Nostra Collezione</h1>
+    <p class="text-center text-muted mb-4">Esplora i nostri volumi esclusivi</p>
+
+    <div class="filter-bar shadow">
+        <form action="{{ route('catalogo') }}" method="GET" class="row g-3 align-items-center justify-content-center">
+            <div class="col-md-4">
+                <select name="categoria" class="form-select form-select-custom">
+                    <option value="">Tutte le categorie</option>
+                    @foreach($categorie as $cat)
+                        <option value="{{ $cat->id_categoria }}" {{ request('categoria') == $cat->id_categoria ? 'selected' : '' }}>
+                            {{ $cat->nome_categoria ?? $cat->nome }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-filter w-100 p-2 rounded-3">Filtra</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        @forelse($libri as $l)
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="libro-card">
                 
-                {{-- Immagine --}}
-                <div style="height: 300px; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
-                    @if($libro->copertina)
-                        <img src="{{ asset('storage/' . $libro->copertina) }}" alt="{{ $libro->titolo }}" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="copertina-wrap">
+                    @if($l->copertina)
+                        <img src="{{ asset('storage/' . $l->copertina) }}" class="copertina-img" alt="{{ $l->titolo }}">
                     @else
-                        <span style="font-size: 4rem;">📖</span>
+                        <div class="placeholder-img">📖</div>
                     @endif
                 </div>
 
-                {{-- Info --}}
-                <div style="padding: 20px; flex-grow: 1;">
-                    <h3 style="margin: 0; font-size: 1.1rem; height: 2.4em; overflow: hidden;">{{ $libro->titolo }}</h3>
-                    <p style="color: #e67e22; font-weight: bold; margin: 10px 0;">
-                        {{ $libro->autore->nome ?? 'Autore' }} {{ $libro->autore->cognome ?? '' }}
-                    </p>
-                    
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 15px;">
-                        <span style="font-size: 1.2rem; font-weight: bold; color: #27ae60;">{{ number_format($libro->prezzo, 2, ',', '.') }}€</span>
-                        
-                        {{-- Tasto Carrello --}}
-                        <form action="{{ route('carrello.add', $libro->id_libro) }}" method="POST">
-                            @csrf
-                            <button type="submit" style="background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                                🛒 Aggiungi
-                            </button>
-                        </form>
+                <div class="libro-corpo">
+                    <div>
+                        <h6 class="text-white mb-1 text-truncate" title="{{ $l->titolo }}">{{ $l->titolo }}</h6>
+                        <p class="text-muted small mb-2">{{ $l->autore->nome ?? '' }} {{ $l->autore->cognome ?? '' }}</p>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="libro-prezzo">€ {{ number_format($l->prezzo, 2) }}</span>
+                        <a href="{{ route('libri.show', $l->id_libro ?? $l->id) }}" class="btn btn-sm btn-outline-light px-3" style="border-radius: 6px;">Vedi</a>
                     </div>
                 </div>
-            </div>
-        @endforeach
-    </div>
 
-    {{-- Pagina 1, 2, 3... --}}
-    <div style="margin-top: 40px; display: flex; justify-content: center;">
-        {{ $libri->links() }}
+            </div>
+        </div>
+        @empty
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">Nessun libro trovato per questa categoria.</p>
+        </div>
+        @endforelse
     </div>
 </div>
 @endsection

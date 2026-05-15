@@ -7,7 +7,7 @@ class Libro extends Model
     protected $table = 'Libro';
     protected $primaryKey = 'id_libro';
     public $timestamps = false;
-    protected $fillable = ['titolo', 'prezzo', 'trama', 'anno_pubblicazione', 'id_autore', 'id_editore'];
+    protected $fillable = ['titolo', 'prezzo', 'trama', 'anno_pubblicazione', 'id_autore', 'id_editore', 'copertina'];
 
     public function autore() { return $this->belongsTo(Autore::class, 'id_autore'); }
     public function editore() { return $this->belongsTo(Editore::class, 'id_editore'); }

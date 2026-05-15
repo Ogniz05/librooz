@@ -86,4 +86,68 @@ class CarrelloController extends Controller
 
         return redirect()->back()->with('success', 'Libro rimosso dal carrello.');
     }
+
+    // Aggiorna le quantità dai tasti + e -
+    public function aggiornaCarrello(Request $request, $id)
+    {
+        $azione = $request->input('azione'); // 'piu' o 'meno'
+
+        if (Auth::check()) {
+            // --- LOGICA DATABASE (Se l'utente è loggato) ---
+            $cartItem = Carrello::where('id_utente', Auth::id())
+                                ->where('id_libro', $id)
+                                ->first();
+
+            if ($cartItem) {
+                if ($azione === 'piu') {
+                    $cartItem->increment('quantita');
+                } elseif ($azione === 'meno') {
+                    if ($cartItem->quantita > 1) {
+                        $cartItem->decrement('quantita');
+                    } else {
+                        $cartItem->delete(); // Rimuove se scende sotto 1
+                    }
+                }
+            }
+        } else {
+            // --- LOGICA SESSIONE (Se l'utente è ospite) ---
+            $carrello = session()->get('carrello', []);
+
+            if (isset($carrello[$id])) {
+                if ($azione === 'piu') {
+                    $carrello[$id]['quantita']++;
+                } elseif ($azione === 'meno') {
+                    $carrello[$id]['quantita']--;
+                    
+                    if ($carrello[$id]['quantita'] < 1) {
+                        unset($carrello[$id]);
+                    }
+                }
+                session()->put('carrello', $carrello);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Quantità aggiornata con successo!');
+    }
+
+    // Mostra la pagina di Checkout (Aggiunto ora)
+    public function mostraCheckout()
+    {
+        if (Auth::check()) {
+            $elementi = Carrello::with('libro.autore')
+                                ->where('id_utente', Auth::id())
+                                ->get();
+        } else {
+            $sessione = session()->get('carrello', []);
+            $elementi = collect($sessione)->map(function($item) {
+                return (object)$item;
+            });
+        }
+
+        if ($elementi->isEmpty()) {
+            return redirect()->route('carrello.index')->with('success', 'Il carrello è vuoto!');
+        }
+
+        return view('checkout.index', compact('elementi'));
+    }
 }
