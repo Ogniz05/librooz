@@ -7,6 +7,8 @@ use App\Http\Controllers\CarrelloController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ProfileController;
+use App\http\Controllers\InfoController;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +23,12 @@ Route::get('/', function () { return view('loading'); })->name('loading');
 Route::get('/home', [LibroController::class, 'index'])->name('home');
 Route::get('/catalogo', [LibroController::class, 'catalogo'])->name('catalogo');
 Route::get('/libri/{id}', [LibroController::class, 'show'])->name('libri.show');
+
+// Rotte Informative del Footer
+Route::get('/chi-siamo', [InfoController::class, 'chiSiamo'])->name('info.chi-siamo');
+Route::get('/spedizioni', [InfoController::class, 'spedizioni'])->name('info.spedizioni');
+Route::get('/resi-rimborsi', [InfoController::class, 'resiRimborsi'])->name('info.resi');
+Route::get('/faq', [InfoController::class, 'faq'])->name('info.faq');
 
 // Rotte Wishlist pubbliche (Ospiti + Loggati)
 Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
@@ -41,10 +49,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profilo', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profilo', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // 📦 Storico Ordini (Temporaneamente puntato a una closure o controller se esistente)
-    Route::get('/ordini', function () { 
-        return "Pagina Ordini in Arrivo!"; 
-    })->name('orders.index');
+
+
+Route::get('/ordini', [OrderController::class, 'index'])->name('orders.index');
 
     // 🛒 Checkout (Pagina di finto pagamento)
     Route::get('/checkout', [CarrelloController::class, 'mostraCheckout'])->name('checkout.index');

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,7 +34,8 @@
             <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
             <li>
                 @auth
-                    <a href="{{ route('catalogo') }}" class="{{ request()->routeIs('catalogo') ? 'active' : '' }}">Catalogo</a>
+                    <a href="{{ route('catalogo') }}"
+                        class="{{ request()->routeIs('catalogo') ? 'active' : '' }}">Catalogo</a>
                 @else
                     <a href="#" onclick="openPopup()">Catalogo</a>
                 @endauth
@@ -42,11 +44,13 @@
 
         {{-- Destra --}}
         <div class="navbar-right" style="display: flex; align-items: center; gap: 15px;">
-            
+
             {{-- Pulsante Wishlist (Aperto a tutti) --}}
-            <a href="{{ route('wishlist.index') }}" class="btn-wishlist" style="text-decoration: none; font-size: 1.2rem; position: relative;" title="La mia Wishlist">
+            <a href="{{ route('wishlist.index') }}" class="btn-wishlist"
+                style="text-decoration: none; font-size: 1.2rem; position: relative;" title="La mia Wishlist">
                 ❤️
-                <span class="badge-wishlist" style="position: absolute; top: -8px; right: -8px; background: #e74c3c; color: white; border-radius: 10px; padding: 1px 6px; font-size: 0.75rem; font-family: sans-serif; font-weight: bold;">
+                <span class="badge-wishlist"
+                    style="position: absolute; top: -8px; right: -8px; background: #e74c3c; color: white; border-radius: 10px; padding: 1px 6px; font-size: 0.75rem; font-family: sans-serif; font-weight: bold;">
                     {{ count(session()->get('wishlist', [])) }}
                 </span>
             </a>
@@ -59,7 +63,7 @@
                     <div class="user-dropdown" id="userDropdown">
                         <a href="{{ route('profile.index') }}">Il mio profilo</a>
                         <a href="{{ route('orders.index') }}">I miei ordini</a>
-                        @if(Auth::user()->isAdmin())
+                        @if (Auth::user()->isAdmin())
                             <a href="/admin/dashboard" class="admin-link">🔧 Pannello Admin</a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}">
@@ -74,16 +78,18 @@
             @endauth
 
             {{-- Pulsante Carrello Dinamico (DB per loggati, Sessione per ospiti) --}}
-            <a href="{{ route('carrello.index') }}" class="btn-carrello" style="position: relative; text-decoration: none;">
+            <a href="{{ route('carrello.index') }}" class="btn-carrello"
+                style="position: relative; text-decoration: none;">
                 🛒
                 @php
-                    $conteggioCarrello = Auth::check() 
-                        ? \App\Models\Carrello::where('id_utente', Auth::id())->sum('quantita') 
+                    $conteggioCarrello = Auth::check()
+                        ? \App\Models\Carrello::where('id_utente', Auth::id())->sum('quantita')
                         : collect(session()->get('carrello', []))->sum('quantita');
                 @endphp
-                
-                @if($conteggioCarrello > 0)
-                    <span class="badge-carrello" style="position: absolute; top: -8px; right: -8px; background: #27ae60; color: white; border-radius: 10px; padding: 1px 6px; font-size: 0.75rem; font-family: sans-serif; font-weight: bold;">
+
+                @if ($conteggioCarrello > 0)
+                    <span class="badge-carrello"
+                        style="position: absolute; top: -8px; right: -8px; background: #27ae60; color: white; border-radius: 10px; padding: 1px 6px; font-size: 0.75rem; font-family: sans-serif; font-weight: bold;">
                         {{ $conteggioCarrello }}
                     </span>
                 @endif
@@ -103,7 +109,8 @@
             {{-- Brand --}}
             <div class="footer-brand">
                 <a href="{{ route('home') }}" class="brand-logo">📚 Librooz</a>
-                <p>Il tuo spazio online dedicato ai libri. Scopri migliaia di titoli, dai classici ai nuovi arrivi, e ordinali comodamente da casa.</p>
+                <p>Il tuo spazio online dedicato ai libri. Scopri migliaia di titoli, dai classici ai nuovi arrivi, e
+                    ordinali comodamente da casa.</p>
                 <div class="footer-social">
                     <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
                     <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
@@ -129,10 +136,10 @@
             <div class="footer-col">
                 <h4>Informazioni</h4>
                 <ul>
-                    <li><a href="#">→ Chi siamo</a></li>
-                    <li><a href="#">→ Spedizioni</a></li>
-                    <li><a href="#">→ Resi e rimborsi</a></li>
-                    <li><a href="#">→ FAQ</a></li>
+                    <li><a href="{{ route('info.chi-siamo') }}">→ Chi siamo</a></li>
+                    <li><a href="{{ route('info.spedizioni') }}">→ Spedizioni</a></li>
+                    <li><a href="{{ route('info.resi') }}">→ Resi e rimborsi</a></li>
+                    <li><a href="{{ route('info.faq') }}">→ FAQ</a></li>
                 </ul>
             </div>
 
@@ -166,7 +173,7 @@
     {{-- SCRIPTS --}}
     <script>
         const hamburger = document.getElementById('hamburger');
-        const navLinks  = document.getElementById('navbar-links');
+        const navLinks = document.getElementById('navbar-links');
 
         hamburger.addEventListener('click', () => {
             hamburger.classList.toggle('open');
@@ -204,11 +211,14 @@
         <div class="popup-icon">📚</div>
         <h2>Accedi per continuare</h2>
         <p>Per sfogliare il catalogo e acquistare libri devi essere registrato su Librooz.</p>
-        <a href="{{ route('login') }}" class="btn-primary" style="display:block;text-align:center;margin-bottom:10px;">Accedi</a>
-        <a href="{{ route('register') }}" class="btn-secondary" style="display:block;text-align:center;">Registrati gratis</a>
+        <a href="{{ route('login') }}" class="btn-primary"
+            style="display:block;text-align:center;margin-bottom:10px;">Accedi</a>
+        <a href="{{ route('register') }}" class="btn-secondary" style="display:block;text-align:center;">Registrati
+            gratis</a>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
+
 </html>
