@@ -9,6 +9,45 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     @stack('styles')
+
+    <style>
+        /* NAVBAR BASE CON TRANSIZIONE FLUIDA */
+        .navbar {
+            background-color: var(--ebano, #1E1E1E);
+            padding: 0 2rem;
+            height: 70px;
+            /* Altezza iniziale della barra */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+            /* Rende fluido il cambio di dimensioni e trasparenze */
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* NAVBAR QUANDO SI SCORRE LA PAGINA (Viene applicata via JavaScript) */
+        .navbar.scrolled {
+            height: 52px;
+            /* Diventa più sottile */
+            background-color: rgba(30, 30, 30, 0.92);
+            /* Effetto semitrasparente scuro */
+            backdrop-filter: blur(10px);
+            /* Sfocatura dello sfondo retrostante */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
+        }
+
+        /* Riduce leggermente gli elementi interni quando la barra si restringe */
+        .navbar.scrolled .navbar-logo,
+        .navbar.scrolled .navbar-links a,
+        .navbar.scrolled .navbar-right a,
+        .navbar.scrolled .user-btn {
+            transform: scale(0.96);
+            transition: transform 0.3s ease;
+        }
+    </style>
 </head>
 
 <body>
@@ -200,6 +239,19 @@
             document.getElementById('popupLogin').classList.remove('open');
             document.getElementById('overlay').classList.remove('open');
         }
+
+        /* EFFETTO TRANSIZIONE ALTEZZA NAVBAR ALLO SCROLL */
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbar = document.querySelector('.navbar');
+
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 40) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        });
     </script>
 
     @stack('scripts')

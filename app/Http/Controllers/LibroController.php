@@ -32,7 +32,10 @@ class LibroController extends Controller
         $libri = $query->get();
         $categorie = Categoria::all();
 
-        return view('catalogo', compact('libri', 'categorie'));
+        // Recupero dei preferiti dalla sessione per accendere i cuoricini all'avvio
+        $wishlistIds = session()->get('wishlist', []);
+
+        return view('catalogo', compact('libri', 'categorie', 'wishlistIds'));
     }
 
     public function show($id)
@@ -63,9 +66,9 @@ class LibroController extends Controller
         $libro->prezzo = $request->input('prezzo');
         $libro->anno_pubblicazione = $request->input('anno_pubblicazione');
         $libro->trama = $request->input('trama');
-        $libro->id_autore = $autore->id_autore; 
+        $libro->id_autore = $autore->id_autore;
 
-        // --- GESTIONE COPERTINA BLINDATA (Corretta per il tuo server locale) ---
+        // --- GESTIONE COPERTINA BLINDATA ---
         if ($request->hasFile('copertina')) {
             $file = $request->file('copertina');
             $filename = time() . '_' . str_replace(' ', '-', strtolower($request->input('titolo'))) . '.' . $file->getClientOriginalExtension();
@@ -85,50 +88,77 @@ class LibroController extends Controller
     public function aggiungiAlCarrello(Request $request, $id)
     {
         $libro = Libro::findOrFail($id);
-
-    // Recuperiamo il carrello attuale dalla sessione, se non esiste creiamo un array vuoto
         $carrello = session()->get('carrello', []);
 
-    // Se il libro è già nel carrello, aumentiamo la quantità, altrimenti lo aggiungiamo
         if(isset($carrello[$id])) {
-        $carrello[$id]['quantita']++;
-        } else {
-        $carrello[$id] = [
-            "titolo" => $libro->titolo,
-            "quantita" => 1,
-            "prezzo" => $libro->prezzo,
-            "copertina" => $libro->copertina
-        ];
-    }
-
-    // Salviamo il carrello aggiornato nella sessione
-    session()->put('carrello', $carrello);
-
-    return redirect()->back()->with('success', 'Splendida scelta! Il volume è stato aggiunto al carrello.');
-}
-
-public function aggiornaCarrello(Request $request, $id)
-{
-    $carrello = session()->get('carrello', []);
-    $azione = $request->input('azione'); // Riceve 'piu' o 'meno'
-
-    if (isset($carrello[$id])) {
-        if ($azione === 'piu') {
             $carrello[$id]['quantita']++;
-        } elseif ($azione === 'meno') {
-            $carrello[$id]['quantita']--;
-            
-            // Se la quantità scende a 0, rimuoviamo completamente il libro
-            if ($carrello[$id]['quantita'] < 1) {
-                unset($carrello[$id]);
-            }
+        } else {
+            $carrello[$id] = [
+                "titolo" => $libro->titolo,
+                "quantita" => 1,
+                "prezzo" => $libro->prezzo,
+                "copertina" => $libro->copertina
+            ];
         }
-        
+
         session()->put('carrello', $carrello);
+
+        // Se la richiesta è AJAX (Fetch), restituiamo una risposta JSON anziché un redirect pesante
+        if ($request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Splendida scelta! Il volume è stato aggiunto al carrello.'
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Splendida scelta! Il volume è stato aggiunto al carrello.');
     }
 
-    return redirect()->back()->with('success', 'Carrello aggiornato!');
-}
+    public function aggiornaCarrello(Request $request, $id)
+    {
+        $carrello = session()->get('carrello', []);
+        $azione = $request->input('azione');
 
+        if (isset($carrello[$id])) {
+            if ($azione === 'piu') {
+                $carrello[$id]['quantita']++;
+            } elseif ($azione === 'meno') {
+                $carrello[$id]['quantita']--;
+                if ($carrello[$id]['quantita'] < 1) {
+                    unset($carrello[$id]);
+                }
+            }
+            
+            session()->put('carrello', $carrello);
+        }
 
+        return redirect()->back()->with('success', 'Carrello aggiornato!');
+    }
+
+    // NUOVA FUNZIONE PER LA WISHLIST IN AJAX
+    public function gestisciWishlist(Request $request)
+    {
+        $id_libro = $request->input('id_libro');
+        $wishlist = session()->get('wishlist', []);
+
+        if (in_array($id_libro, $wishlist)) {
+            // Se il libro è già nei preferiti, lo rimuoviamo
+            $wishlist = array_diff($wishlist, [$id_libro]);
+            session()->put('wishlist', array_values($wishlist));
+            
+            return response()->json([
+                'status' => 'rimosso',
+                'message' => 'Rimosso dalla Wishlist'
+            ]);
+        } else {
+            // Se non c'è, lo aggiungiamo
+            $wishlist[] = $id_libro;
+            session()->put('wishlist', $wishlist);
+            
+            return response()->json([
+                'status' => 'aggiunto',
+                'message' => 'Aggiunto alla Wishlist!'
+            ]);
+        }
+    }
 }

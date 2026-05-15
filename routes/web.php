@@ -7,7 +7,7 @@ use App\Http\Controllers\CarrelloController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ProfileController;
-use App\http\Controllers\InfoController;
+use App\Http\Controllers\InfoController;
 use App\Http\Controllers\OrderController;
 
 /*
@@ -30,10 +30,12 @@ Route::get('/spedizioni', [InfoController::class, 'spedizioni'])->name('info.spe
 Route::get('/resi-rimborsi', [InfoController::class, 'resiRimborsi'])->name('info.resi');
 Route::get('/faq', [InfoController::class, 'faq'])->name('info.faq');
 
-// Rotte Wishlist pubbliche (Ospiti + Loggati)
+// Rotte Wishlist pubbliche
 Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
 Route::post('/wishlist/aggiungi/{id}', [WishlistController::class, 'aggiungi'])->name('wishlist.add');
 Route::delete('/wishlist/rimuovi/{id}', [WishlistController::class, 'rimuovi'])->name('wishlist.remove');
+// Spostata sul controller corretto della Wishlist per mantenere l'ordine
+Route::post('/wishlist/toggle', [WishlistController::class, 'gestisciWishlist'])->name('wishlist.toggle');
 
 // Rotte Carrello pubbliche
 Route::get('/carrello', [CarrelloController::class, 'index'])->name('carrello.index');
@@ -49,9 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profilo', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profilo', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-
-
-Route::get('/ordini', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/ordini', [OrderController::class, 'index'])->name('orders.index');
 
     // 🛒 Checkout (Pagina di finto pagamento)
     Route::get('/checkout', [CarrelloController::class, 'mostraCheckout'])->name('checkout.index');
