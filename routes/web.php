@@ -57,7 +57,7 @@ Route::get('/ordini', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/checkout', [CarrelloController::class, 'mostraCheckout'])->name('checkout.index');
     Route::post('/checkout/conferma', [CarrelloController::class, 'confermaOrdine'])->name('checkout.conferma');
     
-    // 🔧 Pannello Admin
+    // 🔧 Pannello Admin.
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::post('/admin/libri/store', [AdminController::class, 'storeLibro'])->name('admin.libri.store');
 });
