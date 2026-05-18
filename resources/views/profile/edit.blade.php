@@ -6,25 +6,52 @@
     <style>
         body {
             background: #090a0f !important;
-            /* Sfondo scuro e immersivo */
             color: #f8fafc;
             font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
         }
 
-        /* ===== BANNER IMMERSIVO A TUTTA LARGHEZZA ===== */
+        /* ===== BANNER IMMERSIVO MODIFICABILE ===== */
         .fullscreen-banner {
             height: 380px;
-            /* Banner imponente che prende quasi tutta la prima parte dello schermo */
-            background: linear-gradient(135deg, #1f212a 0%, #2c2f3d 50%, #111217 100%);
             background-size: cover;
             background-position: center;
             position: relative;
             width: 100%;
+            cursor: pointer;
+            box-shadow: inset 0 -100px 100px #090a0f;
         }
 
-        /* ===== CONTENITORE CENTRALE DEL PROFILO ===== */
+        .banner-upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .fullscreen-banner:hover .banner-upload-overlay {
+            opacity: 1;
+        }
+
+        .upload-text {
+            background: rgba(11, 12, 17, 0.85);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(6px);
+        }
+
+        /* ===== CONTENITORE CENTRALE ===== */
         .profile-content-container {
             max-width: 850px;
             margin: 0 auto;
@@ -32,34 +59,63 @@
             position: relative;
         }
 
-        /* ===== AVATAR PROFILO GRANDE IN SOVRAPPOSIZIONE ===== */
+        /* ===== AVATAR PROFILO MODIFICABILE ===== */
         .profile-avatar-wrapper {
             margin-top: -90px;
-            /* Spinge l'avatar verso l'alto sul banner */
             margin-bottom: 32px;
             position: relative;
             display: inline-block;
             z-index: 5;
+            cursor: pointer;
         }
 
         .profile-main-avatar {
             width: 160px;
-            /* Dimensione aumentata per dare importanza all'immagine */
             height: 160px;
             border-radius: 50%;
             border: 6px solid #090a0f;
-            /* Contorno spesso per staccarsi dallo sfondo */
-            background: #1d202b;
+            background-size: cover;
+            background-position: center;
+            background-color: #1d202b;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3.5rem;
             font-weight: 700;
             color: #ffffff;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
         }
 
-        /* Badge di verifica Premium */
+        .avatar-upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            font-size: 0.75rem;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+            color: #ffffff;
+        }
+
+        .profile-avatar-wrapper:hover .avatar-upload-overlay {
+            opacity: 1;
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
+
         .profile-verified-badge {
             position: absolute;
             bottom: 8px;
@@ -74,13 +130,13 @@
             justify-content: center;
             font-size: 0.9rem;
             border: 3px solid #090a0f;
+            z-index: 6;
         }
 
-        /* ===== SEZIONI PRINCIPALI (LAYOUT PULITO) ===== */
+        /* ===== GRID E SEZIONI ===== */
         .profile-main-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            /* 2 Terzi per informazioni/about, 1 terzo per i collegamenti */
             gap: 32px;
         }
 
@@ -108,7 +164,6 @@
             letter-spacing: -0.3px;
         }
 
-        /* ===== STRUTTURA DETTAGLI E FORM ===== */
         .profile-info-group {
             margin-bottom: 20px;
         }
@@ -134,16 +189,12 @@
             transition: border-color 0.2s;
         }
 
-        .profile-input-field:focus {
-            border-color: #4a5168 !important;
-        }
-
         .profile-textarea-field {
             min-height: 100px;
             resize: vertical;
         }
 
-        /* ===== PULSANTI DI NAVIGAZIONE RAPIDA (CARRELLO / WISHLIST) ===== */
+        /* ===== COLLEGAMENTI LATERALI ===== */
         .shortcut-navigation-box {
             display: flex;
             flex-direction: column;
@@ -201,7 +252,6 @@
             font-size: 1rem;
         }
 
-        /* ===== PULSANTI DI SALVATAGGIO ===== */
         .btn-profile-submit-dark {
             background: #ffffff;
             color: #090a0f;
@@ -231,37 +281,58 @@
         }
     </style>
 
-    <div class="fullscreen-banner"></div>
+    <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+        @csrf
+        @method('patch')
 
-    <div class="profile-content-container">
+        @php
+            $defaultBanner =
+                'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1500&auto=format&fit=crop';
+            $defaultAvatar =
+                'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=400&auto=format&fit=crop';
+        @endphp
 
-        <div class="profile-avatar-wrapper">
-            <div class="profile-main-avatar">
-                {{ strtoupper(substr($user->name ?? Auth::user()->name, 0, 1)) }}
+        <div id="banner-preview" class="fullscreen-banner"
+            style="background-image: url('{{ $user->banner_path ? asset('storage/' . $user->banner_path) : $defaultBanner }}');"
+            onclick="document.getElementById('banner-input').click();"
+            title="Dimensioni consigliate banner: 1500 x 500 pixel">
+            <div class="banner-upload-overlay">
+                <span class="upload-text">📸 Cambia Banner (Consigliato: 1500x500px)</span>
             </div>
-            <div class="profile-verified-badge">✓</div>
         </div>
+        <input type="file" id="banner-input" name="banner" class="hidden-file-input" accept="image/*">
 
-        @if (session('status') === 'profile-updated' || session('success'))
-            <div class="alert-success-minimal">
-                ✨ Le informazioni del profilo sono state aggiornate.
+        <div class="profile-content-container">
+
+            <div class="profile-avatar-wrapper" onclick="document.getElementById('avatar-input').click();">
+                <div id="avatar-preview" class="profile-main-avatar"
+                    style="@if ($user->avatar_path) background-image: url('{{ asset('storage/' . $user->avatar_path) }}'); @endif">
+                    @if (!$user->avatar_path)
+                        {{ strtoupper(substr($user->nome ?? Auth::user()->name, 0, 1)) }}
+                    @endif
+                    <div class="avatar-upload-overlay">
+                        <span>📷<br>Cambia foto<br>(400x400px)</span>
+                    </div>
+                </div>
+                <div class="profile-verified-badge">✓</div>
             </div>
-        @endif
+            <input type="file" id="avatar-input" name="avatar" class="hidden-file-input" accept="image/*">
 
-        <div class="profile-main-grid">
+            @if (session('status') === 'profile-updated' || session('success'))
+                <div class="alert-success-minimal">
+                    ✨ Le informazioni del profilo sono state aggiornate con successo.
+                </div>
+            @endif
 
-            <div>
-                <form method="post" action="{{ route('profile.update') }}">
-                    @csrf
-                    @method('patch')
-
+            <div class="profile-main-grid">
+                <div>
                     <div class="profile-section-card">
                         <div class="profile-section-title">Informazioni di base</div>
 
                         <div class="profile-info-group">
                             <label for="name">Nome utente</label>
                             <input type="text" id="name" name="name" class="profile-input-field"
-                                value="{{ old('name', $user->name ?? Auth::user()->name) }}" required autocomplete="name">
+                                value="{{ old('name', $user->nome ?? Auth::user()->name) }}" required autocomplete="name">
                         </div>
 
                         <div class="profile-info-group">
@@ -274,7 +345,7 @@
                         <div class="profile-info-group">
                             <label for="address">Indirizzo di Spedizione</label>
                             <input type="text" id="address" name="address" class="profile-input-field"
-                                value="{{ old('address', $user->address ?? 'Nessun indirizzo salvato') }}"
+                                value="{{ old('address', $user->via ?? '') }}" placeholder="Nessun indirizzo salvato"
                                 autocomplete="street-address">
                         </div>
                     </div>
@@ -284,98 +355,83 @@
                         <div class="profile-info-group" style="margin-bottom: 0;">
                             <label for="bio">Biografia del lettore</label>
                             <textarea id="bio" name="bio" class="profile-input-field profile-textarea-field"
-                                placeholder="Raccontaci qualcosa sui tuoi generi letterari preferiti o sul tuo percorso di lettura..."></textarea>
+                                placeholder="Raccontaci qualcosa sui tuoi generi letterari preferiti o sul tuo percorso di lettura...">{{ old('bio', $user->bio ?? '') }}</textarea>
                         </div>
                     </div>
 
                     <button type="submit" class="btn-profile-submit-dark">Salva tutte le modifiche</button>
-                </form>
-            </div>
+                </div>
 
-            <div class="shortcut-navigation-box">
-
-                <a href="{{ route('carrello.index') }}" class="btn-profile-shortcut">
-                    <div class="shortcut-left">
-                        <span class="shortcut-icon">🛒</span>
-                        <div class="shortcut-info">
-                            <span class="shortcut-title">Il mio Carrello</span>
-                            <span class="shortcut-desc">
-                                <span id="profile-cart-count">0</span> articoli in attesa
-                            </span>
+                <div class="shortcut-navigation-box">
+                    <a href="{{ route('carrello.index') }}" class="btn-profile-shortcut">
+                        <div class="shortcut-left">
+                            <span class="shortcut-icon">🛒</span>
+                            <div class="shortcut-info">
+                                <span class="shortcut-title">Il mio Carrello</span>
+                                <span class="shortcut-desc">
+                                    <span id="profile-cart-count">0</span> articoli in attesa
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="shortcut-arrow">&rarr;</div>
-                </a>
+                        <div class="shortcut-arrow">&rarr;</div>
+                    </a>
 
-                <a href="{{ route('wishlist.index') }}" class="btn-profile-shortcut">
-                    <div class="shortcut-left">
-                        <span class="shortcut-icon">❤️</span>
-                        <div class="shortcut-info">
-                            <span class="shortcut-title">Lista dei Desideri</span>
-                            <span class="shortcut-desc">{{ session('wishlist') ? count(session('wishlist')) : 0 }} libri
-                                salvati</span>
+                    <a href="{{ route('wishlist.index') }}" class="btn-profile-shortcut">
+                        <div class="shortcut-left">
+                            <span class="shortcut-icon">❤️</span>
+                            <div class="shortcut-info">
+                                <span class="shortcut-title">Lista dei Desideri</span>
+                                <span class="shortcut-desc">{{ session('wishlist') ? count(session('wishlist')) : 0 }}
+                                    libri salvati</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="shortcut-arrow">&rarr;</div>
-                </a>
-
+                        <div class="shortcut-arrow">&rarr;</div>
+                    </a>
+                </div>
             </div>
-
         </div>
-    </div>
+    </form>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. Isoliamo la barra di navigazione superiore
-            const header = document.querySelector('header') || document.querySelector('nav') || document.body;
+            const avatarInput = document.getElementById('avatar-input');
+            const avatarPreview = document.getElementById('avatar-preview');
+            const bannerInput = document.getElementById('banner-input');
+            const bannerPreview = document.getElementById('banner-preview');
 
-            // 2. Troviamo TUTTI i badge o elementi numerici presenti nell'header
-            // Cerchiamo i contenitori fluttuanti che di solito hanno classi per lo sfondo colorato (rosso/verde)
-            const badges = header.querySelectorAll('span, div, b, strong');
-            let foundNumbers = [];
-
-            badges.forEach(badge => {
-                const text = badge.textContent.trim();
-                // Se l'elemento contiene solo un numero ed è visibile a schermo
-                if (text && !isNaN(text) && badge.offsetHeight > 0) {
-                    foundNumbers.push({
-                        element: badge,
-                        value: parseInt(text, 10),
-                        // Prendiamo la posizione orizzontale sullo schermo
-                        rectLeft: badge.getBoundingClientRect().left
-                    });
-                }
-            });
-
-            // 3. Ordiniamo i numeri trovati da sinistra a destra basandoci sulla loro posizione X sulla pagina
-            foundNumbers.sort((a, b) => a.rectLeft - b.rectLeft);
-
-            let cartCountValue = 0;
-
-            if (foundNumbers.length >= 2) {
-                // Se ci sono almeno due contatori (Wishlist e Carrello):
-                // In base al tuo screenshot, il Carrello è l'ultimo elemento a destra in assoluto!
-                cartCountValue = foundNumbers[foundNumbers.length - 1].value;
-            } else if (foundNumbers.length === 1) {
-                // Se ne trova solo uno, usiamo quello
-                cartCountValue = foundNumbers[0].value;
-            } else {
-                // Fallback estremo se i badge grafici non sono leggibili: proviamo a cercare nel LocalStorage del browser
-                const localCart = localStorage.getItem('cart') || localStorage.getItem('carrello') || localStorage
-                    .getItem('shopping_cart');
-                if (localCart) {
-                    try {
-                        const parsedCart = JSON.parse(localCart);
-                        cartCountValue = parsedCart.length || Object.keys(parsedCart).length || parsedCart;
-                    } catch (e) {
-                        cartCountValue = localCart.replace(/[^0-9]/g, '');
+            if (avatarInput && avatarPreview) {
+                avatarInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            avatarPreview.style.backgroundImage = `url('${e.target.result}')`;
+                            if (avatarPreview.innerText) avatarPreview.innerText = '';
+                        }
+                        reader.readAsDataURL(file);
                     }
-                }
+                });
             }
 
-            // 4. Scriviamo il valore finale nel contatore del profilo
-            const profileCartCount = document.getElementById('profile-cart-count');
-            if (profileCartCount && cartCountValue !== undefined) {
-                profileCartCount.textContent = cartCountValue;
+            if (bannerInput && bannerPreview) {
+                bannerInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            bannerPreview.style.backgroundImage = `url('${e.target.result}')`;
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            const navbarBadge = document.getElementById('cart-count') || document.querySelector('.badge') ||
+                document.querySelector('header span');
+            const profileCount = document.getElementById('profile-cart-count');
+            if (navbarBadge && profileCount) {
+                const countValue = navbarBadge.textContent.trim().replace(/[^0-9]/g, '');
+                if (countValue) profileCount.textContent = countValue;
             }
         });
     </script>

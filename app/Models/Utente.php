@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -9,9 +10,11 @@ class Utente extends Authenticatable
     protected $primaryKey = 'id_utente';
     public $timestamps = false;
 
+    // Aggiornato: ora include bio, avatar_path e banner_path per permettere il salvataggio
     protected $fillable = [
         'nome', 'cognome', 'email', 'password',
-        'telefono', 'via', 'civico', 'cap', 'localita'
+        'telefono', 'via', 'civico', 'cap', 'localita',
+        'bio', 'avatar_path', 'banner_path'
     ];
 
     protected $hidden = ['remember_token'];
