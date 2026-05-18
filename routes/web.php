@@ -34,7 +34,6 @@ Route::get('/faq', [InfoController::class, 'faq'])->name('info.faq');
 Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
 Route::post('/wishlist/aggiungi/{id}', [WishlistController::class, 'aggiungi'])->name('wishlist.add');
 Route::delete('/wishlist/rimuovi/{id}', [WishlistController::class, 'rimuovi'])->name('wishlist.remove');
-// Spostata sul controller corretto della Wishlist per mantenere l'ordine
 Route::post('/wishlist/toggle', [WishlistController::class, 'gestisciWishlist'])->name('wishlist.toggle');
 
 // Rotte Carrello pubbliche
@@ -43,7 +42,9 @@ Route::post('/carrello/aggiungi/{id}', [CarrelloController::class, 'aggiungi'])-
 Route::post('/carrello/aggiorna/{id}', [CarrelloController::class, 'aggiornaCarrello'])->name('carrello.aggiorna');
 Route::delete('/carrello/rimuovi/{id}', [CarrelloController::class, 'rimuovi'])->name('carrello.remove');
 
-// Rotte Protette da Autenticazione (Solo utenti loggati)
+// =========================================================================
+// 🔒 ROTTE PROTETTE DA AUTENTICAZIONE (Solo utenti loggati)
+// =========================================================================
 Route::middleware('auth')->group(function () {
     
     // 👤 Profilo Utente (Allineato a Laravel Breeze)
@@ -57,9 +58,31 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CarrelloController::class, 'mostraCheckout'])->name('checkout.index');
     Route::post('/checkout/conferma', [CarrelloController::class, 'confermaOrdine'])->name('checkout.conferma');
     
-    // 🔧 Pannello Admin.
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::post('/admin/libri/store', [AdminController::class, 'storeLibro'])->name('admin.libri.store');
+    // =========================================================================
+    // ⚙️ AREA ADMIN (Protetta tramite controllo d'accesso nel group)
+    // =========================================================================
+    Route::group([
+        'prefix' => 'admin',
+        'as' => 'admin.',
+        'middleware' => function ($request, $next) {
+            if (!Auth::user() || !Auth::user()->isAdmin()) {
+                return redirect('/home')->with('error', 'Accesso negato. Non hai i permessi di Amministratore.');
+            }
+            return $next($request);
+        }
+    ], function () {
+
+        // Pannello Unico Commerciale (Dashboard con statistiche, form e tabelle a tab)
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+        // Azione di salvataggio del nuovo libro (Form)
+        Route::post('/libri/store', [AdminController::class, 'storeLibro'])->name('libri.store');
+        
+        // Azione di aggiornamento stato per gli ordini dei clienti
+        Route::patch('/ordini/{id}/stato', [AdminController::class, 'aggiornaStatoOrdine'])->name('ordini.updateStato');
+
+    });
+
 });
 
 require __DIR__.'/auth.php';
