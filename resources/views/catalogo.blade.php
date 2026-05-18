@@ -280,7 +280,7 @@
             <form action="{{ route('catalogo') }}" method="GET" class="row g-3 align-items-center justify-content-center">
                 <div class="col-md-5 col-sm-8">
                     <select name="categoria" class="form-select form-select-custom">
-                        <option value="">Tutte le categorieeeeeeeeeeeeeeee</option>
+                        <option value="">Tutte le categorie</option>
                         @foreach ($categorie as $cat)
                             <option value="{{ $cat->id_categoria }}"
                                 {{ request('categoria') == $cat->id_categoria ? 'selected' : '' }}>
